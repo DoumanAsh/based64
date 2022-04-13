@@ -1,0 +1,19 @@
+[package]
+name = "based64"
+version = "0.1.0"
+edition = "2018"
+description = "BASE64 implementation for chads"
+readme = "README.md"
+repository = "https://github.com/DoumanAsh/based64"
+license = "BSL-1.0"
+keywords = ["base64"]
+categories = ["algorithms"]
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE",
+]
+
+[dev-dependencies.getrandom]
+version = "0.2.6"

@@ -1,0 +1,67 @@
+name: Rust
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/rust.yml'
+      - 'src/**.rs'
+      - 'tests/**.rs'
+      - 'Cargo.toml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/rust.yml'
+      - 'src/**.rs'
+      - 'tests/**.rs'
+      - 'Cargo.toml'
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    if: github.event.pull_request.draft == false
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install Rust Unix
+      run: |
+        if rustup --version >/dev/null 2>&1; then
+            rustup update
+        else
+             curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
+             echo ::add-path::$HOME/.cargo/bin
+        fi
+
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v1
+
+    - name: Install Valgrind
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y valgrind
+
+    - name: Rust version
+      run: |
+        cargo --version
+        rustc --version
+
+    - name: Check build
+      run: cargo clippy
+
+    - name: Test
+      run: cargo test
+
+    - name: Valgrind Test
+      env:
+        CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: "valgrind --leak-check=full"
+      run: cargo test --release
+
